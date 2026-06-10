@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema de Contagem de Produtos</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+    font-family: Arial, sans-serif;
+    background: #eef2f5;
+    margin: 0;
+    padding: 20px;
+    color: #222;
+}
+
+.container {
+    max-width: 1280px;
+    margin: auto;
+    background: #fff;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 4px 18px rgba(0,0,0,.08);
+}
+
+h1, h2, h3 { margin-top: 0; }
+h1 { text-align: center; }
+
+.logo-sistema {
+    display: none;
+    max-width: 220px;
+    max-height: 120px;
+    object-fit: contain;
+    margin: 0 auto 15px auto;
+}
+
+.topo-sistema {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.subtitulo {
+    text-align: center;
+    color: #666;
+    margin-bottom: 25px;
+}
+
+.login-box {
+    max-width: 420px;
+    margin: 40px auto;
+    background: #f8f8f8;
+    padding: 25px;
+    border-radius: 14px;
+    border: 1px solid #ddd;
+}
+
+.menu {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 25px;
+    justify-content: center;
+}
+
+.card {
+    background: #fafafa;
+    border: 1px solid #ddd;
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 18px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+}
+
+.campo {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+label {
+    font-size: 13px;
+    font-weight: bold;
+    color: #444;
+}
+
+input, select, button, textarea {
+    padding: 11px;
+    border-radius: 8px;
+    border: 1px solid #bbb;
+    font-size: 15px;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+button {
+    cursor: pointer;
+    border: none;
+    font-weight: bold;
+}
+
+.btn-verde { background: #198754; color: #fff; }
+.btn-azul { background: #0d6efd; color: #fff; }
+.btn-cinza { background: #555; color: #fff; }
+.btn-vermelho { background: #dc3545; color: #fff; }
+.btn-amarelo { background: #ffc107; color: #111; }
+.btn-roxo { background: #6f42c1; color: #fff; }
+
+.acoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.resumo {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.resumo-box {
+    background: #111827;
+    color: white;
+    padding: 17px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.resumo-box strong {
+    display: block;
+    font-size: 25px;
+    margin-top: 6px;
+}
+
+.tabela-wrapper { overflow-x: auto; }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 980px;
+}
+
+th {
+    background: #111827;
+    color: white;
+    padding: 11px;
+}
+
+td {
+    border-bottom: 1px solid #ddd;
+    padding: 9px;
+    text-align: center;
+}
+
+tr:hover { background: #f4f4f4; }
+
+.badge {
+    padding: 5px 9px;
+    border-radius: 999px;
+    background: #e9ecef;
+    font-size: 13px;
+    display: inline-block;
+    margin: 2px;
+}
+
+.oculto { display: none; }
+
+.aviso {
+    background: #fff3cd;
+    color: #664d03;
+    border: 1px solid #ffecb5;
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+}
+
+.produto-contagem {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 120px;
+    gap: 10px;
+    align-items: end;
+    border-bottom: 1px solid #ddd;
+    padding: 10px 0;
+}
+
+.exemplo {
+    background: #f1f5f9;
+    border-left: 4px solid #0d6efd;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #333;
+}
+
+@media(max-width: 700px) {
+    body { padding: 10px; }
+    .container { padding: 14px; }
+    table { min-width: 900px; }
+    .produto-contagem { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="topo-sistema">
+        <img id="logoPrincipal" class="logo-sistema" alt="Logo do sistema">
+        <h1>📦 Sistema de Contagem de Produtos</h1>
+        <p class="subtitulo">Categorias, subcategorias, produtos, usuários e relatórios de contagem.</p>
+    </div>
+
+    <div id="telaLogin" class="login-box">
+        <h2>Acessar sistema</h2>
+
+        <div class="campo">
+            <label>Tipo de acesso</label>
+            <select id="tipoAcesso">
+                <option value="usuario">Usuário - Fazer contagem</option>
+                <option value="admin">Administrador</option>
+            </select>
+        </div>
+
+        <br>
+
+        <div class="campo">
+            <label>Senha do administrador</label>
+            <input type="password" id="senhaAdmin" placeholder="Somente para admin">
+        </div>
+
+        <div class="acoes">
+            <button class="btn-verde" onclick="entrarSistema()">Entrar</button>
+        </div>
+
+        <div class="aviso">
+            Senha padrão do administrador: <strong>admin123</strong>
+        </div>
+    </div>
+
+    <div id="areaSistema" class="oculto">
+
+        <div class="menu">
+            <button class="btn-azul" onclick="mostrarTela('usuario')">Tela do usuário</button>
+            <button id="btnAdmin" class="btn-roxo oculto" onclick="mostrarTela('admin')">Painel admin</button>
+            <button id="btnRelatorios" class="btn-amarelo oculto" onclick="mostrarTela('relatorios')">Relatórios</button>
+            <button class="btn-cinza" onclick="sairSistema()">Sair</button>
+        </div>
+
+        <div id="telaUsuario">
+            <div class="card">
+                <h2>Contagem de produtos</h2>
+
+                <div class="grid">
+                    <div class="campo">
+                        <label>Quem está contando</label>
+                        <input type="text" id="usuarioContador" placeholder="Nome do responsável">
+                    </div>
+
+                    <div class="campo">
+                        <label>Data da contagem</label>
+                        <input type="date" id="usuarioData">
+                    </div>
+
+                    <div class="campo">
+                        <label>Categoria</label>
+                        <select id="usuarioCategoria" onchange="atualizarSubcategoriasUsuario()"></select>
+                    </div>
+
+                    <div class="campo">
+                        <label>Subcategoria</label>
+                        <select id="usuarioSubcategoria" onchange="carregarProdutosUsuario()"></select>
+                    </div>
+                </div>
+
+                <div class="campo" style="margin-top:12px;">
+                    <label>Observação geral</label>
+                    <textarea id="usuarioObservacao" rows="2" placeholder="Opcional"></textarea>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Produtos da subcategoria</h3>
+                <div id="listaProdutosUsuario"></div>
+
+                <div class="acoes">
+                    <button class="btn-verde" onclick="enviarContagem()">Enviar contagem</button>
+                    <button class="btn-cinza" onclick="limparContagemUsuario()">Limpar quantidades</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="telaAdmin" class="oculto">
+            <div class="card">
+                <h2>Painel do administrador</h2>
+                <p>Cadastre categorias, subcategorias e produtos para aparecerem na tela de contagem.</p>
+            </div>
+
+            <div class="card">
+                <h3>Logo do sistema</h3>
+                <p>Envie a logo que deverá aparecer na tela do administrador, na tela de contagem e nos relatórios.</p>
+
+                <div class="grid">
+                    <div class="campo">
+                        <label>Selecionar logo</label>
+                        <input type="file" id="inputLogoSistema" accept="image/*" onchange="carregarLogoSistema(event)">
+                    </div>
+                </div>
+
+                <br>
+
+                <div style="text-align:center;">
+                    <img id="previewLogoAdmin" class="logo-sistema" alt="Prévia da logo">
+                </div>
+
+                <div class="acoes">
+                    <button class="btn-vermelho" onclick="removerLogoSistema()">Remover logo</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>1. Cadastrar categoria</h3>
+
+                <div class="grid">
+                    <div class="campo">
+                        <label>Nome da categoria</label>
+                        <input type="text" id="novaCategoria" placeholder="Ex: Bebidas, Alimentos, Loja">
+                    </div>
+                </div>
+
+                <div class="acoes">
+                    <button class="btn-verde" onclick="adicionarCategoria()">Adicionar categoria</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>2. Cadastrar subcategoria</h3>
+
+                <div class="grid">
+                    <div class="campo">
+                        <label>Categoria principal</label>
+                        <select id="categoriaSubcategoria"></select>
+                    </div>
+
+                    <div class="campo">
+                        <label>Nome da subcategoria</label>
+                        <input type="text" id="novaSubcategoria" placeholder="Ex: Cervejas, Refrigerantes, Chocolates">
+                    </div>
+                </div>
+
+                <div class="acoes">
+                    <button class="btn-verde" onclick="adicionarSubcategoria()">Adicionar subcategoria</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>3. Input rápido de produtos</h3>
+
+                <div class="aviso">
+                    Escolha a categoria e subcategoria, depois cole vários produtos. Cada linha vira um produto.
+                </div>
+
+                <div class="grid">
+                    <div class="campo">
+                        <label>Categoria</label>
+                        <select id="categoriaImportacao" onchange="atualizarSubcategoriasAdmin('categoriaImportacao','subcategoriaImportacao')"></select>
+                    </div>
+
+                    <div class="campo">
+                        <label>Subcategoria</label>
+                        <select id="subcategoriaImportacao"></select>
+                    </div>
+                </div>
+
+                <br>
+
+                <div class="campo">
+                    <label>Lista de produtos</label>
+                    <textarea id="inputProdutosMassa" placeholder="Ex:
+Brahma 350ml
+Skol 350ml
+Coca-Cola 350ml
+Red Bull
+KitKat 11,6g"></textarea>
+                </div>
+
+                <div class="exemplo">
+                    <strong>Modelo aceito:</strong><br>
+                    Brahma 350ml<br>
+                    Skol 350ml<br>
+                    Coca-Cola 350ml<br><br>
+                    Ou com SKU separado por ponto e vírgula:<br>
+                    7891234567890; Brahma 350ml<br>
+                    7899876543210; Coca-Cola 350ml
+                </div>
+
+                <div class="acoes">
+                    <button class="btn-verde" onclick="importarProdutosMassa()">Importar produtos</button>
+                    <button class="btn-cinza" onclick="document.getElementById('inputProdutosMassa').value=''">Limpar campo</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>4. Cadastrar produto individual</h3>
+
+                <div class="grid">
+                    <div class="campo">
+                        <label>Categoria</label>
+                        <select id="adminCategoriaProduto" onchange="atualizarSubcategoriasAdmin('adminCategoriaProduto','adminSubcategoriaProduto')"></select>
+                    </div>
+
+                    <div class="campo">
+                        <label>Subcategoria</label>
+                        <select id="adminSubcategoriaProduto"></select>
+                    </div>
+
+                    <div class="campo">
+                        <label>Nome do produto</label>
+                        <input type="text" id="novoProduto" placeholder="Ex: Brahma 350ml">
+                    </div>
+
+                    <div class="campo">
+                        <label>Código/SKU</label>
+                        <input type="text" id="novoSku" placeholder="Opcional">
+                    </div>
+                </div>
+
+                <div class="acoes">
+                    <button class="btn-verde" onclick="adicionarProduto()">Adicionar produto</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Categorias cadastradas</h3>
+                <div class="tabela-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Categoria</th>
+                                <th>Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaCategorias"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Subcategorias cadastradas</h3>
+                <div class="tabela-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Categoria</th>
+                                <th>Subcategoria</th>
+                                <th>Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaSubcategorias"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Produtos cadastrados</h3>
+
+                <div class="grid">
+                    <div class="campo">
+                        <label>Pesquisar produto</label>
+                        <input type="text" id="pesquisaProdutoAdmin" placeholder="Buscar produto, SKU, categoria ou subcategoria" oninput="carregarTabelaProdutosAdmin()">
+                    </div>
+                </div>
+
+                <br>
+
+                <div class="tabela-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Categoria</th>
+                                <th>Subcategoria</th>
+                                <th>Produto</th>
+                                <th>SKU</th>
+                                <th>Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaProdutosAdmin"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Configurações</h3>
+
+                <div class="grid">
+                    <div class="campo">
+                        <label>Nova senha do administrador</label>
+                        <input type="password" id="novaSenhaAdmin" placeholder="Digite a nova senha">
+                    </div>
+                </div>
+
+                <div class="acoes">
+                    <button class="btn-azul" onclick="alterarSenhaAdmin()">Alterar senha</button>
+                    <button class="btn-vermelho" onclick="resetarSistema()">Resetar sistema inteiro</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="telaRelatorios" class="oculto">
+            <div class="resumo">
+                <div class="resumo-box">
+                    Contagens enviadas
+                    <strong id="totalContagens">0</strong>
+                </div>
+                <div class="resumo-box">
+                    Itens contados
+                    <strong id="totalItens">0</strong>
+                </div>
+                <div class="resumo-box">
+                    Quantidade total
+                    <strong id="totalQuantidade">0</strong>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Relatórios de contagem</h2>
+
+                <div class="grid">
+                    <div class="campo">
+                        <label>Pesquisar</label>
+                        <input type="text" id="pesquisaRelatorio" placeholder="Produto, categoria, subcategoria ou responsável" oninput="carregarRelatorios()">
+                    </div>
+
+                    <div class="campo">
+                        <label>Filtrar por data</label>
+                        <input type="date" id="filtroDataRelatorio" onchange="carregarRelatorios()">
+                    </div>
+
+                    <div class="campo">
+                        <label>Filtrar por categoria</label>
+                        <select id="filtroCategoriaRelatorio" onchange="carregarRelatorios()"></select>
+                    </div>
+                </div>
+
+                <div class="acoes">
+                    <button class="btn-azul" onclick="exportarCSV()">Exportar CSV/Excel</button>
+                    <button class="btn-amarelo" onclick="window.print()">Imprimir</button>
+                    <button class="btn-vermelho" onclick="apagarContagens()">Apagar contagens</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Registros enviados</h3>
+                <div class="tabela-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Responsável</th>
+                                <th>Categoria</th>
+                                <th>Subcategoria</th>
+                                <th>Produto</th>
+                                <th>SKU</th>
+                                <th>Quantidade</th>
+                                <th>Observação</th>
+                                <th>Enviado em</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaRelatorios"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+const senhaPadrao = "admin123";
+
+let categorias = JSON.parse(localStorage.getItem("categorias_contagem_v2")) || [
+    "Bebidas", "Alimentos", "Conveniência"
+];
+
+let subcategorias = JSON.parse(localStorage.getItem("subcategorias_contagem_v2")) || [
+    { id: 1, categoria: "Bebidas", nome: "Cervejas" },
+    { id: 2, categoria: "Bebidas", nome: "Refrigerantes" },
+    { id: 3, categoria: "Bebidas", nome: "Energéticos" },
+    { id: 4, categoria: "Bebidas", nome: "Águas" },
+    { id: 5, categoria: "Alimentos", nome: "Salgados" },
+    { id: 6, categoria: "Conveniência", nome: "Chocolates" }
+];
+
+let produtos = JSON.parse(localStorage.getItem("produtos_contagem_v2")) || [
+    { id: 1, categoria: "Bebidas", subcategoria: "Cervejas", nome: "Brahma 350ml", sku: "" },
+    { id: 2, categoria: "Bebidas", subcategoria: "Cervejas", nome: "Skol 350ml", sku: "" },
+    { id: 3, categoria: "Bebidas", subcategoria: "Refrigerantes", nome: "Coca-Cola 350ml", sku: "" },
+    { id: 4, categoria: "Bebidas", subcategoria: "Energéticos", nome: "Red Bull", sku: "" },
+    { id: 5, categoria: "Alimentos", subcategoria: "Salgados", nome: "Salgado assado", sku: "" },
+    { id: 6, categoria: "Conveniência", subcategoria: "Chocolates", nome: "KitKat 11,6g", sku: "" }
+];
+
+let contagens = JSON.parse(localStorage.getItem("registros_contagem_v2")) || [];
+let senhaAdmin = localStorage.getItem("senha_admin_contagem_v2") || senhaPadrao;
+let logoSistema = localStorage.getItem("logo_sistema_contagem_v2") || ""; 
+
+document.getElementById("usuarioData").valueAsDate = new Date();
+
+function salvarBase() {
+    localStorage.setItem("categorias_contagem_v2", JSON.stringify(categorias));
+    localStorage.setItem("subcategorias_contagem_v2", JSON.stringify(subcategorias));
+    localStorage.setItem("produtos_contagem_v2", JSON.stringify(produtos));
+    localStorage.setItem("registros_contagem_v2", JSON.stringify(contagens));
+    localStorage.setItem("senha_admin_contagem_v2", senhaAdmin);
+    localStorage.setItem("logo_sistema_contagem_v2", logoSistema);
+}
+
+function entrarSistema() {
+    const tipo = document.getElementById("tipoAcesso").value;
+    const senha = document.getElementById("senhaAdmin").value;
+
+    if (tipo === "admin" && senha !== senhaAdmin) {
+        alert("Senha de administrador incorreta.");
+        return;
+    }
+
+    document.getElementById("telaLogin").classList.add("oculto");
+    document.getElementById("areaSistema").classList.remove("oculto");
+
+    if (tipo === "admin") {
+        document.getElementById("btnAdmin").classList.remove("oculto");
+        document.getElementById("btnRelatorios").classList.remove("oculto");
+        mostrarTela("admin");
+    } else {
+        document.getElementById("btnAdmin").classList.add("oculto");
+        document.getElementById("btnRelatorios").classList.add("oculto");
+        mostrarTela("usuario");
+    }
+
+    atualizarTudo();
+}
+
+function sairSistema() {
+    document.getElementById("areaSistema").classList.add("oculto");
+    document.getElementById("telaLogin").classList.remove("oculto");
+    document.getElementById("senhaAdmin").value = "";
+}
+
+function mostrarTela(tela) {
+    document.getElementById("telaUsuario").classList.add("oculto");
+    document.getElementById("telaAdmin").classList.add("oculto");
+    document.getElementById("telaRelatorios").classList.add("oculto");
+
+    if (tela === "usuario") document.getElementById("telaUsuario").classList.remove("oculto");
+    if (tela === "admin") document.getElementById("telaAdmin").classList.remove("oculto");
+    if (tela === "relatorios") document.getElementById("telaRelatorios").classList.remove("oculto");
+
+    atualizarTudo();
+}
+
+function atualizarTudo() {
+    carregarSelectCategorias();
+    atualizarSubcategoriasUsuario();
+    atualizarSubcategoriasAdmin("adminCategoriaProduto", "adminSubcategoriaProduto");
+    atualizarSubcategoriasAdmin("categoriaImportacao", "subcategoriaImportacao");
+    carregarTabelaCategorias();
+    carregarTabelaSubcategorias();
+    carregarTabelaProdutosAdmin();
+    carregarRelatorios();
+    aplicarLogoSistema();
+}
+
+function carregarSelectCategorias() {
+    const ids = [
+        "usuarioCategoria",
+        "categoriaSubcategoria",
+        "categoriaImportacao",
+        "adminCategoriaProduto",
+        "filtroCategoriaRelatorio"
+    ];
+
+    ids.forEach(id => {
+        const select = document.getElementById(id);
+        if (!select) return;
+
+        const valorAtual = select.value;
+        select.innerHTML = "";
+
+        if (id === "filtroCategoriaRelatorio") {
+            select.innerHTML += `<option value="">Todas as categorias</option>`;
+        }
+
+        categorias.forEach(cat => {
+            select.innerHTML += `<option value="${cat}">${cat}</option>`;
+        });
+
+        if (valorAtual && categorias.includes(valorAtual)) select.value = valorAtual;
+    });
+}
+
+function atualizarSubcategoriasUsuario() {
+    const categoria = document.getElementById("usuarioCategoria").value;
+    const select = document.getElementById("usuarioSubcategoria");
+    select.innerHTML = "";
+
+    const lista = subcategorias.filter(s => s.categoria === categoria);
+
+    lista.forEach(sub => {
+        select.innerHTML += `<option value="${sub.nome}">${sub.nome}</option>`;
+    });
+
+    carregarProdutosUsuario();
+}
+
+function atualizarSubcategoriasAdmin(idCategoria, idSubcategoria) {
+    const categoria = document.getElementById(idCategoria)?.value;
+    const select = document.getElementById(idSubcategoria);
+    if (!select) return;
+
+    const valorAtual = select.value;
+    select.innerHTML = "";
+
+    const lista = subcategorias.filter(s => s.categoria === categoria);
+
+    lista.forEach(sub => {
+        select.innerHTML += `<option value="${sub.nome}">${sub.nome}</option>`;
+    });
+
+    if (valorAtual && lista.some(s => s.nome === valorAtual)) {
+        select.value = valorAtual;
+    }
+}
+
+function carregarProdutosUsuario() {
+    const categoria = document.getElementById("usuarioCategoria").value;
+    const subcategoria = document.getElementById("usuarioSubcategoria").value;
+    const lista = document.getElementById("listaProdutosUsuario");
+    lista.innerHTML = "";
+
+    const produtosFiltrados = produtos.filter(p => p.categoria === categoria && p.subcategoria === subcategoria);
+
+    if (!subcategoria) {
+        lista.innerHTML = `<div class="aviso">Nenhuma subcategoria cadastrada para essa categoria.</div>`;
+        return;
+    }
+
+    if (produtosFiltrados.length === 0) {
+        lista.innerHTML = `<div class="aviso">Nenhum produto cadastrado nessa subcategoria.</div>`;
+        return;
+    }
+
+    produtosFiltrados.forEach(produto => {
+        lista.innerHTML += `
+            <div class="produto-contagem">
+                <div>
+                    <strong>${produto.nome}</strong><br>
+                    <span class="badge">${produto.categoria}</span>
+                    <span class="badge">${produto.subcategoria}</span>
+                    ${produto.sku ? `<span class="badge">SKU: ${produto.sku}</span>` : ""}
+                </div>
+
+                <div class="campo">
+                    <label>Quantidade contada</label>
+                    <input type="number" min="0" data-produto-id="${produto.id}" placeholder="0">
+                </div>
+
+                <div>
+                    <button class="btn-cinza" onclick="zerarProduto(${produto.id})">Zerar</button>
+                </div>
+            </div>
+        `;
+    });
+}
+
+function zerarProduto(id) {
+    const input = document.querySelector(`[data-produto-id="${id}"]`);
+    if (input) input.value = "";
+}
+
+function enviarContagem() {
+    const contador = document.getElementById("usuarioContador").value.trim();
+    const data = document.getElementById("usuarioData").value;
+    const observacao = document.getElementById("usuarioObservacao").value.trim();
+    const inputs = document.querySelectorAll("[data-produto-id]");
+
+    if (!contador || !data) {
+        alert("Informe quem contou e a data da contagem.");
+        return;
+    }
+
+    let itensEnviados = 0;
+    const loteId = Date.now();
+
+    inputs.forEach(input => {
+        const quantidade = Number(input.value);
+        const produtoId = Number(input.dataset.produtoId);
+
+        if (quantidade > 0) {
+            const produto = produtos.find(p => p.id === produtoId);
+
+            contagens.push({
+                loteId,
+                id: Date.now() + Math.random(),
+                data,
+                contador,
+                categoria: produto.categoria,
+                subcategoria: produto.subcategoria,
+                produto: produto.nome,
+                sku: produto.sku,
+                quantidade,
+                observacao,
+                enviadoEm: new Date().toLocaleString("pt-BR")
+            });
+
+            itensEnviados++;
+        }
+    });
+
+    if (itensEnviados === 0) {
+        alert("Informe a quantidade de pelo menos um produto.");
+        return;
+    }
+
+    salvarBase();
+    limparContagemUsuario();
+    alert("Contagem enviada com sucesso!");
+}
+
+function limparContagemUsuario() {
+    document.querySelectorAll("[data-produto-id]").forEach(input => input.value = "");
+    document.getElementById("usuarioObservacao").value = "";
+}
+
+function adicionarCategoria() {
+    const nome = document.getElementById("novaCategoria").value.trim();
+
+    if (!nome) {
+        alert("Digite o nome da categoria.");
+        return;
+    }
+
+    if (categorias.includes(nome)) {
+        alert("Essa categoria já existe.");
+        return;
+    }
+
+    categorias.push(nome);
+    salvarBase();
+    document.getElementById("novaCategoria").value = "";
+    atualizarTudo();
+}
+
+function adicionarSubcategoria() {
+    const categoria = document.getElementById("categoriaSubcategoria").value;
+    const nome = document.getElementById("novaSubcategoria").value.trim();
+
+    if (!categoria || !nome) {
+        alert("Selecione a categoria e digite o nome da subcategoria.");
+        return;
+    }
+
+    const existe = subcategorias.some(s => s.categoria === categoria && s.nome.toLowerCase() === nome.toLowerCase());
+
+    if (existe) {
+        alert("Essa subcategoria já existe nessa categoria.");
+        return;
+    }
+
+    subcategorias.push({
+        id: Date.now(),
+        categoria,
+        nome
+    });
+
+    salvarBase();
+    document.getElementById("novaSubcategoria").value = "";
+    atualizarTudo();
+}
+
+function importarProdutosMassa() {
+    const categoria = document.getElementById("categoriaImportacao").value;
+    const subcategoria = document.getElementById("subcategoriaImportacao").value;
+    const texto = document.getElementById("inputProdutosMassa").value.trim();
+
+    if (!categoria || !subcategoria) {
+        alert("Selecione categoria e subcategoria.");
+        return;
+    }
+
+    if (!texto) {
+        alert("Cole ou digite a lista de produtos.");
+        return;
+    }
+
+    const linhas = texto.split("\n").map(l => l.trim()).filter(l => l.length > 0);
+
+    let adicionados = 0;
+    let duplicados = 0;
+
+    linhas.forEach(linha => {
+        let sku = "";
+        let nome = linha;
+
+        if (linha.includes(";")) {
+            const partes = linha.split(";");
+            sku = partes[0].trim();
+            nome = partes.slice(1).join(";").trim();
+        }
+
+        if (!nome) return;
+
+        const jaExiste = produtos.some(p =>
+            p.nome.toLowerCase() === nome.toLowerCase() &&
+            p.categoria === categoria &&
+            p.subcategoria === subcategoria
+        );
+
+        if (jaExiste) {
+            duplicados++;
+            return;
+        }
+
+        produtos.push({
+            id: Date.now() + Math.random(),
+            categoria,
+            subcategoria,
+            nome,
+            sku
+        });
+
+        adicionados++;
+    });
+
+    salvarBase();
+    document.getElementById("inputProdutosMassa").value = "";
+    atualizarTudo();
+
+    alert(`${adicionados} produto(s) importado(s). ${duplicados} duplicado(s) ignorado(s).`);
+}
+
+function adicionarProduto() {
+    const categoria = document.getElementById("adminCategoriaProduto").value;
+    const subcategoria = document.getElementById("adminSubcategoriaProduto").value;
+    const nome = document.getElementById("novoProduto").value.trim();
+    const sku = document.getElementById("novoSku").value.trim();
+
+    if (!categoria || !subcategoria || !nome) {
+        alert("Selecione categoria, subcategoria e digite o nome do produto.");
+        return;
+    }
+
+    const jaExiste = produtos.some(p =>
+        p.nome.toLowerCase() === nome.toLowerCase() &&
+        p.categoria === categoria &&
+        p.subcategoria === subcategoria
+    );
+
+    if (jaExiste) {
+        alert("Esse produto já existe nessa subcategoria.");
+        return;
+    }
+
+    produtos.push({
+        id: Date.now(),
+        categoria,
+        subcategoria,
+        nome,
+        sku
+    });
+
+    salvarBase();
+
+    document.getElementById("novoProduto").value = "";
+    document.getElementById("novoSku").value = "";
+
+    atualizarTudo();
+}
+
+function excluirCategoria(categoria) {
+    const existeSub = subcategorias.some(s => s.categoria === categoria);
+    const existeProduto = produtos.some(p => p.categoria === categoria);
+
+    if (existeSub || existeProduto) {
+        alert("Não é possível excluir uma categoria que possui subcategorias ou produtos.");
+        return;
+    }
+
+    if (!confirm("Deseja excluir essa categoria?")) return;
+
+    categorias = categorias.filter(c => c !== categoria);
+    salvarBase();
+    atualizarTudo();
+}
+
+function excluirSubcategoria(id) {
+    const sub = subcategorias.find(s => s.id === id);
+    const existeProduto = produtos.some(p => p.categoria === sub.categoria && p.subcategoria === sub.nome);
+
+    if (existeProduto) {
+        alert("Não é possível excluir uma subcategoria que possui produtos cadastrados.");
+        return;
+    }
+
+    if (!confirm("Deseja excluir essa subcategoria?")) return;
+
+    subcategorias = subcategorias.filter(s => s.id !== id);
+    salvarBase();
+    atualizarTudo();
+}
+
+function excluirProduto(id) {
+    if (!confirm("Deseja excluir esse produto?")) return;
+
+    produtos = produtos.filter(p => p.id !== id);
+    salvarBase();
+    atualizarTudo();
+}
+
+function carregarTabelaCategorias() {
+    const tabela = document.getElementById("tabelaCategorias");
+    if (!tabela) return;
+
+    tabela.innerHTML = "";
+
+    categorias.forEach(cat => {
+        tabela.innerHTML += `
+            <tr>
+                <td>${cat}</td>
+                <td><button class="btn-vermelho" onclick="excluirCategoria('${cat}')">Excluir</button></td>
+            </tr>
+        `;
+    });
+}
+
+function carregarTabelaSubcategorias() {
+    const tabela = document.getElementById("tabelaSubcategorias");
+    if (!tabela) return;
+
+    tabela.innerHTML = "";
+
+    subcategorias
+        .sort((a, b) => a.categoria.localeCompare(b.categoria))
+        .forEach(sub => {
+            tabela.innerHTML += `
+                <tr>
+                    <td>${sub.categoria}</td>
+                    <td>${sub.nome}</td>
+                    <td><button class="btn-vermelho" onclick="excluirSubcategoria(${sub.id})">Excluir</button></td>
+                </tr>
+            `;
+        });
+}
+
+function carregarTabelaProdutosAdmin() {
+    const tabela = document.getElementById("tabelaProdutosAdmin");
+    if (!tabela) return;
+
+    const pesquisa = (document.getElementById("pesquisaProdutoAdmin")?.value || "").toLowerCase();
+
+    tabela.innerHTML = "";
+
+    produtos
+        .filter(p => `${p.nome} ${p.sku} ${p.categoria} ${p.subcategoria}`.toLowerCase().includes(pesquisa))
+        .sort((a, b) => (a.categoria + a.subcategoria).localeCompare(b.categoria + b.subcategoria))
+        .forEach(produto => {
+            tabela.innerHTML += `
+                <tr>
+                    <td>${produto.categoria}</td>
+                    <td>${produto.subcategoria}</td>
+                    <td>${produto.nome}</td>
+                    <td>${produto.sku || "-"}</td>
+                    <td><button class="btn-vermelho" onclick="excluirProduto(${produto.id})">Excluir</button></td>
+                </tr>
+            `;
+        });
+}
+
+function carregarRelatorios() {
+    const tabela = document.getElementById("tabelaRelatorios");
+    if (!tabela) return;
+
+    const pesquisa = document.getElementById("pesquisaRelatorio").value.toLowerCase();
+    const filtroData = document.getElementById("filtroDataRelatorio").value;
+    const filtroCategoria = document.getElementById("filtroCategoriaRelatorio").value;
+
+    let filtrados = contagens.filter(item => {
+        const texto = `${item.produto} ${item.categoria} ${item.subcategoria} ${item.contador} ${item.sku}`.toLowerCase();
+        const okPesquisa = texto.includes(pesquisa);
+        const okData = filtroData ? item.data === filtroData : true;
+        const okCategoria = filtroCategoria ? item.categoria === filtroCategoria : true;
+
+        return okPesquisa && okData && okCategoria;
+    });
+
+    tabela.innerHTML = "";
+
+    if (filtrados.length === 0) {
+        tabela.innerHTML = `<tr><td colspan="9">Nenhum registro encontrado.</td></tr>`;
+    }
+
+    filtrados
+        .sort((a, b) => new Date(b.data) - new Date(a.data))
+        .forEach(item => {
+            tabela.innerHTML += `
+                <tr>
+                    <td>${formatarData(item.data)}</td>
+                    <td>${item.contador}</td>
+                    <td>${item.categoria}</td>
+                    <td>${item.subcategoria}</td>
+                    <td>${item.produto}</td>
+                    <td>${item.sku || "-"}</td>
+                    <td>${item.quantidade}</td>
+                    <td>${item.observacao || "-"}</td>
+                    <td>${item.enviadoEm}</td>
+                </tr>
+            `;
+        });
+
+    document.getElementById("totalContagens").innerText = new Set(contagens.map(c => c.loteId)).size;
+    document.getElementById("totalItens").innerText = contagens.length;
+    document.getElementById("totalQuantidade").innerText = contagens.reduce((t, i) => t + Number(i.quantidade), 0);
+}
+
+function exportarCSV() {
+    if (contagens.length === 0) {
+        alert("Não há contagens para exportar.");
+        return;
+    }
+
+    let csv = "Data;Responsavel;Categoria;Subcategoria;Produto;SKU;Quantidade;Observacao;Enviado em\n";
+
+    contagens.forEach(item => {
+        csv += `"${formatarData(item.data)}";"${item.contador}";"${item.categoria}";"${item.subcategoria}";"${item.produto}";"${item.sku || ""}";"${item.quantidade}";"${item.observacao || ""}";"${item.enviadoEm}"\n`;
+    });
+
+    const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "relatorio_contagem_produtos.csv";
+    link.click();
+}
+
+function apagarContagens() {
+    if (!confirm("Deseja apagar todas as contagens enviadas?")) return;
+
+    contagens = [];
+    salvarBase();
+    carregarRelatorios();
+}
+
+function alterarSenhaAdmin() {
+    const novaSenha = document.getElementById("novaSenhaAdmin").value.trim();
+
+    if (novaSenha.length < 4) {
+        alert("A senha precisa ter pelo menos 4 caracteres.");
+        return;
+    }
+
+    senhaAdmin = novaSenha;
+    salvarBase();
+    document.getElementById("novaSenhaAdmin").value = "";
+    alert("Senha alterada com sucesso!");
+}
+
+function resetarSistema() {
+    if (!confirm("Isso irá apagar categorias, subcategorias, produtos, contagens e senha. Deseja continuar?")) return;
+
+    localStorage.removeItem("categorias_contagem_v2");
+    localStorage.removeItem("subcategorias_contagem_v2");
+    localStorage.removeItem("produtos_contagem_v2");
+    localStorage.removeItem("registros_contagem_v2");
+    localStorage.removeItem("senha_admin_contagem_v2");
+
+    alert("Sistema resetado. Recarregue a página.");
+}
+
+
+function carregarLogoSistema(event) {
+    const arquivo = event.target.files[0];
+
+    if (!arquivo) return;
+
+    if (!arquivo.type.startsWith("image/")) {
+        alert("Selecione um arquivo de imagem.");
+        return;
+    }
+
+    const leitor = new FileReader();
+
+    leitor.onload = function(e) {
+        logoSistema = e.target.result;
+        salvarBase();
+        aplicarLogoSistema();
+        alert("Logo adicionada com sucesso!");
+    };
+
+    leitor.readAsDataURL(arquivo);
+}
+
+function aplicarLogoSistema() {
+    const logos = [
+        document.getElementById("logoPrincipal"),
+        document.getElementById("previewLogoAdmin")
+    ];
+
+    logos.forEach(logo => {
+        if (!logo) return;
+
+        if (logoSistema) {
+            logo.src = logoSistema;
+            logo.style.display = "block";
+        } else {
+            logo.removeAttribute("src");
+            logo.style.display = "none";
+        }
+    });
+}
+
+function removerLogoSistema() {
+    if (!confirm("Deseja remover a logo do sistema?")) return;
+
+    logoSistema = "";
+    localStorage.removeItem("logo_sistema_contagem_v2");
+
+    const input = document.getElementById("inputLogoSistema");
+    if (input) input.value = "";
+
+    aplicarLogoSistema();
+    alert("Logo removida.");
+}
+
+
+function formatarData(data) {
+    if (!data) return "-";
+    const partes = data.split("-");
+    return `${partes[2]}/${partes[1]}/${partes[0]}`;
+}
+
+salvarBase();
+aplicarLogoSistema();
+</script>
+
+</body>
+</html>
